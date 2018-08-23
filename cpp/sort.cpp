@@ -14,11 +14,14 @@ void bubblesort(int* A, int length) {
 	}
 
 	bool swapped = true;
-	while (swapped) {
+	for (int i = 0; i < length - 1; i++) {
+		if (!swapped) {
+			break;
+		}
 		swapped = false;
-		for (int i = 0; i < length - 1; i++) {
-			if (A[i] > A[i + 1]) {
-				swap(A, i, i + 1);
+		for (int j = 0; j < length - 1 - i; j++) {
+			if (A[j] > A[j + 1]) {
+				swap(A, j, j + 1);
 				swapped = true;
 			}
 		}
