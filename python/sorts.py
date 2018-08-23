@@ -1,6 +1,9 @@
-from random import shuffle
+import random
+import time
 import matplotlib.pyplot as plt
-import matplotlib.animation as anim
+import matplotlib.animation as animation
+
+# NOTE: Python version >3.3 is required, due to "yield from" feature.
 
 def swap(A, i, j):
     """Helper function to swap elements i and j of list A."""
@@ -15,11 +18,13 @@ def bubblesort(A):
         return
 
     swapped = True
-    while swapped:
+    for i in range(len(A) - 1):
+        if not swapped:
+            break
         swapped = False
-        for i in range(len(A) - 1):
-            if A[i] > A[i + 1]:
-                swap(A, i, i + 1)
+        for j in range(len(A) - 1 - i):
+            if A[j] > A[j + 1]:
+                swap(A, j, j + 1)
                 swapped = True
             yield A
 
@@ -109,10 +114,6 @@ def selectionsort(A):
         swap(A, i, minIdx)
         yield A
 
-def update_fig(A, rects):
-    for rect, val in zip(rects, A):
-        rect.set_height(val)
-
 if __name__ == "__main__":
     N = int(input("Enter number of integers: "))
     method_msg = "Enter sorting method:\n(b)ubble\n(i)nsertion\n(m)erge \
@@ -120,8 +121,8 @@ if __name__ == "__main__":
     method = input(method_msg)
 
     A = [x + 1 for x in range(N)]
-    shuffle(A)
-    A_original = list(A)
+    random.seed(time.time())
+    random.shuffle(A)
 
     if method == "b":
         title = "Bubble sort"
@@ -140,11 +141,20 @@ if __name__ == "__main__":
         generator = selectionsort(A)
 
     fig, ax = plt.subplots()
-    bar = ax.bar(range(len(A)), A, align="edge")
-    ax.set_xlim(0, N + 1)
-    ax.set_ylim(0, N + 1)
+    bar_rects = ax.bar(range(len(A)), A, align="edge")
+    ax.set_xlim(0, N)
+    ax.set_ylim(0, int(1.07 * N))
     ax.set_title(title)
+    text = ax.text(0.02, 0.95, "", transform=ax.transAxes)
 
-    ani = anim.FuncAnimation(fig, func=update_fig, fargs=(bar,), 
-        frames=generator, interval=1, repeat=False)
+    iteration = [0]
+    def update_fig(A, rects, iteration):
+        for rect, val in zip(rects, A):
+            rect.set_height(val)
+        iteration[0] += 1
+        text.set_text("# of operations: {}".format(iteration[0]))
+
+    anim = animation.FuncAnimation(fig, func=update_fig,
+        fargs=(bar_rects, iteration), frames=generator, interval=1,
+        repeat=False)
     plt.show()
